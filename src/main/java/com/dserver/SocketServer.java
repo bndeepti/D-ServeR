@@ -1,8 +1,10 @@
 package com.dserver;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import com.dserver.handler.RequestHandler;
+import com.dserver.model.StartLines.HttpMethod;
+import com.dserver.model.StartLines.RequestLine;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -20,14 +22,20 @@ public class SocketServer {
         serverSocket = new ServerSocket(port);
         System.out.println("Waiting for clients...");
         Socket client = serverSocket.accept();
-        sendWelcomeMessage(client);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        String[] requestLineParameters = bufferedReader.readLine().split(" ");
+        RequestLine requestLine = new RequestLine(requestLineParameters);
+        processRequest(requestLine, client);
     }
 
-    private void sendWelcomeMessage(Socket client) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-        writer.write("Hello. You are connected to a Simple Socket Server.");
-        writer.flush();
-        writer.close();
+    private void processRequest(RequestLine requestLine, Socket client) {
+        if(requestLine.getMethod() == HttpMethod.GET) {
+            try {
+                new RequestHandler().processGetRequest(requestLine, client);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void main(String[] args) {

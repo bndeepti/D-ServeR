@@ -1,8 +1,6 @@
 package com.dserver;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -20,6 +18,10 @@ public class SocketClient {
     public void connect() throws UnknownHostException, IOException {
         System.out.println("Attempting to connect to "+hostname+":"+port);
         socketClient = new Socket(hostname,port);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream()));
+        writer.write("GET /api/file HTTP/1.1");
+        writer.newLine();
+        writer.flush();
         System.out.println("Connection Established");
     }
 
